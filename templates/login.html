@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход — Документооборот</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: #fef5e7; /* Кремовый фон как на фото */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            background: #ffffff; /* Белая карточка */
+            border-radius: 16px;
+            padding: 40px 30px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08); /* Мягкая тень */
+            color: #333; /* Тёмный текст */
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h2 {
+            font-size: 1.8rem;
+            color: #4a6fa5; /* Синий акцент */
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-size: 0.95rem;
+        }
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fdf8ee; /* Очень светлый крем */
+            color: #333;
+            font-size: 1rem;
+        }
+        input:focus {
+            outline: none;
+            border-color: #4a6fa5;
+            background: #fff;
+        }
+        .password-wrapper {
+            position: relative;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #777;
+            font-size: 1.2rem;
+        }
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: #4a6fa5; /* Синяя кнопка */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.2s;
+            box-shadow: 0 4px 12px rgba(74, 111, 165, 0.2);
+        }
+        .btn-login:hover {
+            background: #3a5a80;
+        }
+        .messages {
+            margin-bottom: 20px;
+        }
+        .alert {
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        .alert-error {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+        }
+        .alert-success {
+            background: ##e8f5e9;
+            color: #00a550;
+            border: 1px solid #e8f5e9;
+        }
+        .back-link {
+            display: block;
+            margin-top: 20px;
+            color: #4a6fa5;
+            text-align: center;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Авторизация</h2>
+        </div>
+
+        <!-- Сообщения об ошибках/успехах -->
+        <div class="messages">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'error' if category == 'error' else 'success' }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <form method="POST">
+            <div class="form-group">
+                <label for="login">Логин</label>
+                <input type="login" id="login" name="login" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Пароль</label>
+                <div class="password-wrapper">
+                    <input type="password" id="password" name="password" required>
+                    <span class="toggle-password" id="togglePassword">👁️</span>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-login">Войти</button>
+        </form>
+
+        <a href="/" class="back-link">← Назад</a>
+    </div>
+
+    <script>
+        const toggle = document.getElementById('togglePassword');
+        const password = document.getElementById('password');
+
+        toggle.addEventListener('click', () => {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            toggle.textContent = type === 'password' ? '👁️' : '🙈';
+        });
+    </script>
+</body>
+</html>

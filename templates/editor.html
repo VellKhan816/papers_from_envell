@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактор документа</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: #fef5e7;
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .header {
+            max-width: 800px;
+            margin: 0 auto 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            color: #4a6fa5;
+            font-size: 1.5rem;
+        }
+        .btn {
+            background: #4a6fa5;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-left: 10px;
+        }
+        .btn:hover {
+            background: #3a5a80;
+        }
+        .editor-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        .doc-title-input {
+            width: 100%;
+            padding: 16px 20px;
+            font-size: 1.4rem;
+            font-weight: 600;
+            border: none;
+            border-bottom: 1px solid #eee;
+            outline: none;
+            background: #fdf8ee;
+        }
+        .doc-content {
+            width: 100%;
+            min-height: 70vh;
+            padding: 20px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            border: none;
+            outline: none;
+            resize: none;
+        }
+        .back-link {
+            color: #4a6fa5;
+            text-decoration: none;
+            font-size: 0.95rem;
+        }
+        #save-status {
+            margin-top: 8px;
+            font-size: 0.85rem;
+            color: #6c757d;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Редактор документа</h1>
+        <a href="/dashboard" class="back-link">← Назад к документам</a>
+    </div>
+
+    <div class="editor-container">
+        <input type="text" class="doc-title-input" id="docTitle" placeholder="Название документа" value="{{ title }}">
+        <textarea class="doc-content" id="docContent" placeholder="Начните писать здесь...">{{ content }}</textarea>
+    </div>
+
+    <div style="max-width: 800px; margin: 20px auto 0; display: flex; justify-content: flex-end; align-items: center; gap: 15px;">
+        <div id="save-status">Авто: включено (каждые 30 сек)</div>
+        <button class="btn" onclick="saveDocument()">Сохранить</button>
+    </div>
+
+    <!-- Скрытые поля для обновления -->
+    <input type="hidden" id="docFile" value="{{ doc_file or '' }}">
+
+    <script>
+        let autoSaveInterval;
+
+        function saveToServer(title, content, docFile) {
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('content', content);
+            if (docFile) formData.append('doc_file', docFile);
+
+            return fetch('/save-document', {
+                method: 'POST',
+                body: formData
+            });
+        }
+
+        async function saveDocument() {
+            const title = document.getElementById('docTitle').value.trim() || 'Без названия';
+            const content = document.getElementById('docContent').value;
+            const docFile = document.getElementById('docFile').value;
+
+            try {
+                const response = await saveToServer(title, content, docFile);
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Обновляем скрытое поле, если новый документ
+                    if (!docFile && result.filename) {
+                        document.getElementById('docFile').value = result.filename;
+                    }
+                    document.getElementById('save-status').textContent = '✅ Сохранено!';
+                    document.getElementById('save-status').style.color = '#1b5e20';
+                    setTimeout(() => {
+                        document.getElementById('save-status').textContent = 'Авто: включено (каждые 30 сек)';
+                        document.getElementById('save-status').style.color = '#6c757d';
+                    }, 3000);
+                } else {
+                    document.getElementById('save-status').textContent = '❌ Ошибка';
+                    document.getElementById('save-status').style.color = '#c62828';
+                }
+            } catch (err) {
+                document.getElementById('save-status').textContent = '❌ Ошибка сети';
+                document.getElementById('save-status').style.color = '#c62828';
+                console.error(err);
+            }
+        }
+
+        function startAutoSave() {
+            autoSaveInterval = setInterval(() => {
+                if (document.getElementById('docContent').value.trim()) {
+                    saveDocument();
+                }
+            }, 30000);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                saveDocument();
+            }
+        });
+
+        window.addEventListener('load', startAutoSave);
+        window.addEventListener('beforeunload', () => {
+            if (autoSaveInterval) clearInterval(autoSaveInterval);
+        });
+    </script>
+
+</body>
+</html>

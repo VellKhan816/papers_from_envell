@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добро пожаловать!</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #fef5e7; /* Кремовый фон как на фото */
+            color: #333; /* Тёмный текст */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        .welcome-text {
+            font-size: 2.2rem;
+            font-weight: 600;
+            margin-bottom: 40px;
+            color: #4a6fa5; /* Синий акцент */
+            text-shadow: 0 0 8px rgba(74, 111, 165, 0.3); /* Мягкое свечение */
+        }
+        .start-btn {
+            background: #4a6fa5; /* Синяя кнопка как на фото */
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 16px 40px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            box-shadow: 0 4px 15px rgba(74, 111, 165, 0.3); /* Мягкая тень */
+        }
+        .start-btn:hover {
+            background: #3a5a80; /* Темнее при наведении */
+            transform: scale(1.03);
+        }
+    </style>
+</head>
+<body>
+    <div class="welcome-text">Добро пожаловать в систему Документооборота</div>
+    <button class="start-btn" onclick="window.location.href='/login'">
+        Приступим к работе
+    </button>
+</body>
+</html>

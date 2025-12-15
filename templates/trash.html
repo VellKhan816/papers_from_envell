@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Корзина — Мои Документы</title>
+    <style>
+        /* ========== ОБЩИЕ СТИЛИ ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition:
+                background-color 0.3s ease,
+                color 0.3s ease,
+                border-color 0.3s ease,
+                box-shadow 0.3s ease,
+                opacity 0.2s ease;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+        }
+
+        /* ========== ТЁМНАЯ ТЕМА ========== */
+        body.theme-dark {
+            background: #121212;
+            color: #ffffff;
+        }
+
+        .theme-dark .sidebar,
+        .theme-dark .header,
+        .theme-dark .section,
+        .theme-dark .doc-card,
+        .theme-dark .modal-content,
+        .theme-dark .tooltip-text,
+        .theme-dark .action-btn,
+        .theme-dark .controls,
+        .theme-dark .search-control,
+        .theme-dark .filter-controls,
+        .theme-dark .filter-btn,
+        .theme-dark .dropdown-content,
+        .theme-dark .dropdown-item,
+        .theme-dark .delete-btn,
+        .theme-dark .modal-content,
+        .theme-dark .search-input,
+        .theme-dark .messages {
+            background: #1e1e1e;
+            color: #ffffff;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            border: 1px solid #333;
+        }
+
+        .theme-dark .sidebar-item,
+        .theme-dark .avatar,
+        .theme-dark .doc-card {
+            background: #2a2a2a;
+            border: 1px solid #444;
+        }
+
+        .theme-dark .create-btn {
+            background: #7c6ae5;
+            color: white;
+            box-shadow: 0 4px 12px rgba(124, 106, 229, 0.4);
+        }
+
+        .theme-dark .create-btn:hover {
+            background: #6a5ad3;
+        }
+
+        .theme-dark .edit-btn {
+            background: #7c6ae5;
+            color: white;
+        }
+
+        .theme-dark .edit-btn:hover {
+            background: #6a5ad3;
+        }
+
+        .theme-dark .download-btn {
+            background: #333;
+            color: #b3a4ff;
+            border: 1px solid #444;
+        }
+
+        .theme-dark .download-btn:hover {
+            background: #444;
+            color: #d1c6ff;
+        }
+
+        .theme-dark .delete-btn,
+        .theme-dark .restore-btn {
+            background: #ff6b6b;
+            color: white;
+            border: 1px solid #ff4d4d;
+        }
+
+        .theme-dark .delete-btn:hover,
+        .theme-dark .restore-btn:hover {
+            background: #ff5252;
+        }
+
+        .theme-dark .doc-icon,
+        .theme-dark .section-title,
+        .theme-dark .logo,
+        .theme-dark .modal-title {
+            color: #b3a4ff;
+        }
+
+        .theme-dark .doc-date,
+        .theme-dark .doc-preview,
+        .theme-dark .search-input {
+            color: #aaa;
+        }
+
+        .theme-dark .action-btn {
+            color: #7c6ae5;
+            border: none;
+        }
+
+        .theme-dark .action-btn:hover {
+            color: #b3a4ff;
+        }
+
+        .theme-dark .tooltip-text {
+            background: #2a2a2a;
+            color: #e0e0e0;
+            border: 1px solid #444;
+        }
+
+        .theme-dark .search-input {
+            background: #2a2a2a;
+            border-color: #444;
+            color: white;
+        }
+
+        .theme-dark .filter-btn {
+            background: #2a2a2a;
+            color: #ccc;
+            border: 1px solid #444;
+        }
+
+        .theme-dark .filter-btn:hover {
+            background: #333;
+        }
+
+        .theme-dark .filter-btn.active {
+            background: #7c6ae5;
+            color: white;
+            border-color: #7c6ae5;
+        }
+
+        .theme-dark .dropdown-content {
+            background: #2a2a2a;
+            border: 1px solid #444;
+        }
+
+        .theme-dark .dropdown-item {
+            color: #ccc;
+        }
+
+        .theme-dark .dropdown-item:hover {
+            background: #333;
+        }
+
+        .theme-dark .dropdown-item.active {
+            background: #7c6ae5;
+            color: white;
+        }
+
+        .theme-dark .btn-cancel {
+            background: #333;
+            color: #ccc;
+            border: 1px solid #444;
+        }
+
+        .theme-dark .btn-cancel:hover {
+            background: #444;
+        }
+
+        .theme-dark .btn-confirm {
+            background: #ff6b6b;
+            color: white;
+            border: 1px solid #ff4d4d;
+        }
+
+        .theme-dark .btn-confirm:hover {
+            background: #ff5252;
+        }
+
+        .theme-dark .alert-error {
+            background: #ff4d4d20;
+            color: #ff6b6b;
+            border: 1px solid #ff4d4d40;
+        }
+
+        .theme-dark .alert-success {
+            background: #77dd7720;
+            color: #77dd77;
+            border: 1px solid #77dd7740;
+        }
+
+        /* ========== СВЕТЛАЯ ТЕМА ========== */
+        body.theme-light {
+            background: #fef5e7;
+            color: #333;
+        }
+
+        .theme-light .sidebar,
+        .theme-light .header,
+        .theme-light .section,
+        .theme-light .doc-card,
+        .theme-light .modal-content,
+        .theme-light .tooltip-text,
+        .theme-light .action-btn,
+        .theme-light .controls,
+        .theme-light .search-control,
+        .theme-light .filter-controls,
+        .theme-light .filter-btn,
+        .theme-light .dropdown-content,
+        .theme-light .dropdown-item,
+        .theme-light .delete-btn,
+        .theme-light .modal-content,
+        .theme-light .search-input,
+        .theme-light .messages {
+            background: #fff;
+            color: #333;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+            border: 1px solid #e0e0e0;
+        }
+
+        .theme-light .sidebar-item,
+        .theme-light .avatar,
+        .theme-light .doc-card {
+            background: #fdf8ee;
+            border: 1px solid #eee;
+        }
+
+        .theme-light .create-btn {
+            background: #4a6fa5;
+            color: white;
+            box-shadow: 0 4px 12px rgba(74, 111, 165, 0.2);
+        }
+
+        .theme-light .create-btn:hover {
+            background: #3a5a80;
+        }
+
+        .theme-light .edit-btn {
+            background: #4a6fa5;
+            color: white;
+        }
+
+        .theme-light .edit-btn:hover {
+            background: #3a5a80;
+        }
+
+        .theme-light .download-btn {
+            background: #e9ecef;
+            color: #495057;
+            border: 1px solid #ced4da;
+        }
+
+        .theme-light .download-btn:hover {
+            background: #dee2e6;
+        }
+
+        .theme-light .delete-btn,
+        .theme-light .restore-btn {
+            background: #ff6b6b;
+            color: white;
+            border: 1px solid #ff4d4d;
+        }
+
+        .theme-light .delete-btn:hover,
+        .theme-light .restore-btn:hover {
+            background: #ff5252;
+        }
+
+        .theme-light .doc-icon,
+        .theme-light .section-title,
+        .theme-light .logo,
+        .theme-light .modal-title {
+            color: #4a6fa5;
+        }
+
+        .theme-light .doc-date,
+        .theme-light .doc-preview,
+        .theme-light .search-input {
+            color: #6c757d;
+        }
+
+        .theme-light .action-btn {
+            color: #4a6fa5;
+            border: none;
+        }
+
+        .theme-light .action-btn:hover {
+            color: #3a5a80;
+        }
+
+        .theme-light .tooltip-text {
+            background: #333;
+            color: #fff;
+            border: 1px solid #555;
+        }
+
+        .theme-light .search-input {
+            background: #fdf8ee;
+            border-color: #ddd;
+            color: #333;
+        }
+
+        .theme-light .filter-btn {
+            background: #f0f5fb;
+            color: #4a6fa5;
+            border: 1px solid #d0dfea;
+        }
+
+        .theme-light .filter-btn:hover {
+            background: #e0ebf8;
+        }
+
+        .theme-light .filter-btn.active {
+            background: #4a6fa5;
+            color: white;
+            border-color: #4a6fa5;
+        }
+
+        .theme-light .dropdown-content {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+        }
+
+        .theme-light .dropdown-item {
+            color: #495057;
+        }
+
+        .theme-light .dropdown-item:hover {
+            background: #f0f5fb;
+        }
+
+        .theme-light .dropdown-item.active {
+            background: #4a6fa5;
+            color: white;
+        }
+
+        .theme-light .btn-cancel {
+            background: #e9ecef;
+            color: #495057;
+            border: 1px solid #ced4da;
+        }
+
+        .theme-light .btn-cancel:hover {
+            background: #dee2e6;
+        }
+
+        .theme-light .btn-confirm {
+            background: #ff6b6b;
+            color: white;
+            border: 1px solid #ff4d4d;
+        }
+
+        .theme-light .btn-confirm:hover {
+            background: #ff5252;
+        }
+
+        .theme-light .alert-error {
+            background: #ff4d4d20;
+            color: #ff6b6b;
+            border: 1px solid #ff4d4d40;
+        }
+
+        .theme-light .alert-success {
+            background: #77dd77;
+            color: #333;
+            border: 1px solid #c8e6c9;
+        }
+
+        /* ========== ОСТАЛЬНЫЕ СТИЛИ ========== */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            gap: 20px;
+            z-index: 1001;
+            transition: transform 0.3s ease;
+            transform: translateX(-60px);
+            border: none;
+            border-radius: 0;
+        }
+
+        .sidebar.open {
+            transform: translateX(0);
+        }
+
+        .sidebar-item {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.8rem;
+            position: relative;
+        }
+
+        .sidebar-item.active {
+            background: #4a6fa5 !important;
+            color: white !important;
+        }
+
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            z-index: 100;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0);
+            z-index: 999;
+            pointer-events: none;
+        }
+
+        .overlay.visible {
+            background: rgba(0, 0, 0, 0.5);
+            pointer-events: all;
+            transition: background 0.3s ease;
+        }
+
+        .header {
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-radius: 12px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .menu-icon {
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .section {
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .create-btn {
+            border: none;
+            border-radius: 50px;
+            padding: 12px 20px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: fit-content;
+            text-decoration: none;
+        }
+
+        .recent-docs {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .doc-card {
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+            cursor: pointer;
+            backface-visibility: hidden;
+            perspective: 1000px;
+            transition: transform 0.3s ease;
+        }
+
+        .doc-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .doc-icon {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .doc-title {
+            font-size: 1rem;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .doc-date {
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+        }
+
+        .doc-preview {
+            font-size: 0.8rem;
+            line-height: 1.4;
+            max-height: 80px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+        }
+
+        .edit-btn {
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            margin-top: 10px;
+            display: inline-block;
+            text-decoration: none;
+            width: 100%;
+            text-align: center;
+        }
+
+        .download-btns {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .download-btn {
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            flex: 1;
+            text-align: center;
+        }
+
+        .delete-btn,
+        .restore-btn {
+            border: none;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            margin-top: 8px;
+            width: 100%;
+        }
+
+        .restore-btn {
+            background: #28a745;
+            color: white;
+            border: 1px solid #218838;
+        }
+
+        .restore-btn:hover {
+            background: #218838;
+        }
+
+        .empty-trash-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .empty-trash-btn:hover {
+            background: #c82333;
+        }
+
+        /* ========== ИНДИКАТОР КОЛИЧЕСТВА ========= */
+        .badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ff4d4d;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+
+        /* ========== ПОДСКАЗКИ ========== */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            text-align: center;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            position: absolute;
+            z-index: 1002;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            white-space: nowrap;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .sidebar .tooltip .tooltip-text {
+            bottom: auto;
+            top: 50%;
+            left: 100%;
+            transform: translateY(-50%);
+            margin-left: 10px;
+        }
+
+        .sidebar .tooltip .tooltip-text::after {
+            top: 50%;
+            left: -10px;
+            margin-top: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: transparent var(--tooltip-bg) transparent transparent;
+        }
+
+        .avatar .tooltip-text,
+        .action-btn .tooltip-text {
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .avatar .tooltip-text::after,
+        .action-btn .tooltip-text::after {
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-color: var(--tooltip-bg) transparent transparent transparent;
+        }
+
+        /* ========== СООБЩЕНИЯ ========== */
+        .messages {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 12px;
+        }
+
+        .alert {
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        /* ========== МОДАЛЬНОЕ ОКНО ========== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            border-radius: 12px;
+            padding: 30px;
+            width: 400px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-title {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+        }
+
+        .modal-text {
+            margin-bottom: 20px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .btn-cancel {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .btn-confirm {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body class="theme-light">
+
+    <!-- Боковое меню -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-item tooltip">
+            <a href="/dashboard" style="text-decoration: none; color: inherit; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">🏠</a>
+            <span class="tooltip-text">Главная</span>
+        </div>
+        <div class="sidebar-item tooltip">
+            <a href="/dashboard" style="text-decoration: none; color: inherit; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">📄</a>
+            <span class="tooltip-text">Документы</span>
+        </div>
+        <div class="sidebar-item tooltip">
+            <span>📁</span>
+            <span class="tooltip-text">Папки</span>
+        </div>
+        <div class="sidebar-item tooltip">
+            <span>🔔</span>
+            <span class="tooltip-text">Напоминания</span>
+        </div>
+        <!-- ✅ ИКОНКА КОРЗИНЫ С ИНДИКАТОРОМ (АКТИВНА) -->
+        <div class="sidebar-item tooltip active">
+            <a href="/trash" style="text-decoration: none; color: inherit; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; position: relative;">
+                🗑️
+                {% if trash_count > 0 %}
+                    <span class="badge">{{ trash_count }}</span>
+                {% endif %}
+            </a>
+            <span class="tooltip-text">Корзина</span>
+        </div>
+        <div style="flex-grow: 1;"></div>
+        <div class="sidebar-item tooltip">
+            <span>⚙️</span>
+            <span class="tooltip-text">Настройки</span>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+
+    <div class="main-content" id="mainContent">
+
+        <div class="header">
+            <div class="header-left">
+                <div class="menu-icon" id="menuToggle">☰</div>
+                <div class="logo">
+                    <span>🗑️</span>
+                    <span>Корзина</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="theme-toggle" id="themeToggle">🌙</button>
+                <div class="avatar tooltip">
+                    {{ user[0].upper() }}
+                    <span class="tooltip-text">Профиль</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="messages">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'error' if category == 'error' else 'success' }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <div class="section">
+            <div class="section-title">
+                <i>🗑️</i> Удалённые документы
+            </div>
+
+            {% if documents %}
+                <div class="recent-docs">
+                    {% for doc in documents %}
+                        <div class="doc-card">
+                            <div class="doc-icon">📄</div>
+                            <div class="doc-title">{{ doc.title }}</div>
+                            <div class="doc-date">{{ doc.date }}</div>
+                            <div class="doc-preview">{{ doc.preview }}</div>
+
+                            <a href="/editor?doc={{ doc.filename }}" class="edit-btn">✏️ Редактировать</a>
+
+                            <div class="download-btns">
+                                <a href="/download/txt/{{ doc.filename }}" class="download-btn">TXT</a>
+                                <a href="/download/docx/{{ doc.filename }}" class="download-btn">DOCX</a>
+                                <a href="/download/pdf/{{ doc.filename }}" class="download-btn">PDF</a>
+                            </div>
+
+                            <button class="restore-btn" onclick="restoreDocument('{{ doc.filename }}', '{{ doc.title }}')">
+                                ↩️ Восстановить
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <button class="empty-trash-btn" onclick="confirmEmptyTrash()">
+                    🧹 Очистить корзину
+                </button>
+            {% else %}
+                <p style="text-align: center; color: #6c757d; padding: 20px; background: #fff; border-radius: 12px;">
+                    Корзина пуста. Удалённые документы хранятся 30 дней, затем удаляются автоматически.
+                </p>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <!-- Модальные окна -->
+    <div class="modal" id="restoreModal">
+        <div class="modal-content">
+            <div class="modal-title">✅ Восстановление</div>
+            <div class="modal-text">
+                Документ "<span id="restoreTitle"></span>" будет восстановлен в основную папку.
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn btn-cancel" id="cancelRestore">Отмена</button>
+                <button class="modal-btn btn-confirm" id="confirmRestoreBtn">Восстановить</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="emptyTrashModal">
+        <div class="modal-content">
+            <div class="modal-title">⚠️ Очистка корзины</div>
+            <div class="modal-text">
+                Все документы в корзине будут <strong>удалены навсегда</strong>. Это действие нельзя отменить.
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn btn-cancel" id="cancelEmptyTrash">Отмена</button>
+                <button class="modal-btn btn-confirm" id="confirmEmptyTrashBtn">Очистить навсегда</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentRestoreFile = '';
+
+        // ========== ТЕМА ==========
+        const body = document.body;
+        const themeToggle = document.getElementById('themeToggle');
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        body.className = `theme-${savedTheme}`;
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+        themeToggle.addEventListener('click', () => {
+            const newTheme = body.classList.contains('theme-dark') ? 'light' : 'dark';
+            body.className = `theme-${newTheme}`;
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+            localStorage.setItem('theme', newTheme);
+        });
+
+        // ========== МЕНЮ ==========
+        const sidebar = document.getElementById('sidebar');
+        const menuToggle = document.getElementById('menuToggle');
+        const overlay = document.getElementById('overlay');
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('visible');
+        });
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('visible');
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('visible');
+                document.getElementById('restoreModal').classList.remove('show');
+                document.getElementById('emptyTrashModal').classList.remove('show');
+            }
+        });
+
+        // ========== ВОССТАНОВЛЕНИЕ ==========
+        function restoreDocument(filename, title) {
+            currentRestoreFile = filename;
+            document.getElementById('restoreTitle').textContent = title;
+            document.getElementById('restoreModal').classList.add('show');
+        }
+
+        document.getElementById('cancelRestore').addEventListener('click', () => {
+            document.getElementById('restoreModal').classList.remove('show');
+        });
+
+        document.getElementById('confirmRestoreBtn').addEventListener('click', () => {
+            fetch(`/restore-document/${encodeURIComponent(currentRestoreFile)}`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('❌ Ошибка восстановления');
+                }
+            });
+        });
+
+        // ========== ОЧИСТКА КОРЗИНЫ ==========
+        function confirmEmptyTrash() {
+            document.getElementById('emptyTrashModal').classList.add('show');
+        }
+
+        document.getElementById('cancelEmptyTrash').addEventListener('click', () => {
+            document.getElementById('emptyTrashModal').classList.remove('show');
+        });
+
+        document.getElementById('confirmEmptyTrashBtn').addEventListener('click', () => {
+            fetch('/empty-trash', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('❌ Ошибка очистки');
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
