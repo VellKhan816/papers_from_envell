@@ -3,171 +3,881 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Редактор документа</title>
+    <title>{{ title }} — Редактор</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.2s, color 0.2s, transform 0.1s;
         }
+
         body {
-            background: #fef5e7;
-            color: #333;
             min-height: 100vh;
-            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            background: #f9f9f9;
+            color: #333;
         }
-        .header {
-            max-width: 800px;
-            margin: 0 auto 20px;
+
+        /* ========== ШАПКА ДОКУМЕНТА ========== */
+        .doc-header {
+            background: #ffffff;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            z-index: 100;
+        }
+
+        .doc-title-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-grow: 1;
+        }
+
+        .doc-icon {
+            font-size: 1.2rem;
+            color: #aaa;
+        }
+
+        .doc-title-input {
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            outline: none;
+            background: transparent;
+            padding: 6px 10px;
+            border-radius: 4px;
+            width: 100%;
+            max-width: 300px;
+            transition: background 0.2s;
+            color: #333;
+        }
+
+        .doc-title-input:focus {
+            background: #f0f0f0;
+        }
+
+        .star-icon {
+            cursor: pointer;
+            color: #777;
+            font-size: 1.2rem;
+            transition: color 0.2s;
+        }
+
+        .star-icon:hover {
+            color: #ff6b6b;
+        }
+
+        .star-icon.active {
+            color: #ff6b6b;
+        }
+
+        /* ========== ПАНЕЛЬ ИНСТРУМЕНТОВ ========== */
+        .toolbar {
+            background: #ffffff;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-wrap: wrap;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+            z-index: 99;
+        }
+
+        .toolbar-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            transition: all 0.2s;
+            font-size: 1rem;
+            color: #333;
+            position: relative;
+        }
+
+        .toolbar-btn:hover {
+            background: #e9ecef;
+            border-color: #c0c0c0;
+        }
+
+        .toolbar-btn:active {
+            transform: scale(0.95);
+        }
+
+        .toolbar-btn.active {
+            background: #d1e7dd;
+            border-color: #a3cfbb;
+            color: #1a5d1a;
+        }
+
+        .toolbar-btn i {
+            font-style: normal;
+            font-weight: bold;
+        }
+
+        .toolbar-divider {
+            width: 1px;
+            height: 24px;
+            background: #ddd;
+            margin: 0 8px;
+        }
+
+        .toolbar-dropdown {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .toolbar-select {
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            min-width: 80px;
+            transition: border-color 0.2s;
+            color: #333;
+        }
+
+        .toolbar-select:focus {
+            outline: none;
+            border-color: #7c6ae5;
+        }
+
+        .toolbar-input {
+            width: 50px;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 0.9rem;
+            transition: border-color 0.2s;
+            color: #333;
+        }
+
+        .toolbar-input:focus {
+            outline: none;
+            border-color: #7c6ae5;
+        }
+
+        /* ========== ПАЛИТРА ЦВЕТОВ ========== */
+        .color-picker {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ffffff;
+            border: 1px solid #ddd;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            z-index: 1000;
+            padding: 8px;
+            display: none;
+            border-radius: 4px;
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 5px;
+        }
+
+        .theme-dark .color-picker {
+            background: #2a2a2a;
+            border-color: #444;
+        }
+
+        .color-option {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border 0.2s;
+        }
+
+        .color-option:hover {
+            border-color: #7c6ae5;
+        }
+
+        .color-option.selected {
+            border-color: #7c6ae5;
+        }
+
+        .color-option.black { background: #000000; }
+        .color-option.red { background: #ff0000; }
+        .color-option.green { background: #00ff00; }
+        .color-option.blue { background: #0000ff; }
+        .color-option.yellow { background: #ffff00; }
+        .color-option.orange { background: #ffa500; }
+        .color-option.purple { background: #800080; }
+        .color-option.gray { background: #808080; }
+        .color-option.white { background: #ffffff; border: 2px solid #ddd; }
+
+        .theme-dark .color-option.black { background: #ffffff; }
+        .theme-dark .color-option.white { background: #1e1e1e; border: 2px solid #444; }
+        .theme-dark .color-option.red { background: #ff6b6b; }
+        .theme-dark .color-option.green { background: #77dd77; }
+        .theme-dark .color-option.blue { background: #7c6ae5; }
+        .theme-dark .color-option.yellow { background: #ffff80; }
+        .theme-dark .color-option.orange { background: #ffb74d; }
+        .theme-dark .color-option.purple { background: #d180ff; }
+        .theme-dark .color-option.gray { background: #aaaaaa; }
+
+        /* ========== КНОПКИ ЦВЕТА ========== */
+        .toolbar-btn.color-btn {
+            position: relative;
+        }
+
+        .toolbar-btn.color-btn.active {
+            background: #d1e7dd;
+            border-color: #a3cfbb;
+        }
+
+        /* ========== ПОДСКАЗКИ ========== */
+        .tooltip {
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: #ffffff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s, visibility 0.2s;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .toolbar-btn:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* ========== ОСНОВНОЙ КОНТЕНТ ========== */
+        .editor-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .editor-area {
+            width: 100%;
+            min-height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 20px;
+            background: white;
+            font-family: Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.6;
+            resize: none;
+            outline: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: border-color 0.2s, box-shadow 0.2s;
+            color: #333;
+        }
+
+        .editor-area:focus {
+            border-color: #7c6ae5;
+            box-shadow: 0 2px 8px rgba(124, 106, 229, 0.2);
+        }
+
+        /* ========== СТИЛИ ТЕМЫ ========== */
+        body.theme-dark {
+            background: #121212;
+            color: #ffffff;
+        }
+
+        .theme-dark .doc-header,
+        .theme-dark .toolbar,
+        .theme-dark .editor-content {
+            background: #1e1e1e;
+            border-color: #333;
+            color: #ffffff;
+        }
+
+        .theme-dark .toolbar-btn {
+            background: #2a2a2a;
+            border-color: #444;
+            color: #ffffff;
+        }
+
+        .theme-dark .toolbar-btn:hover {
+            background: #333;
+        }
+
+        .theme-dark .toolbar-btn.active {
+            background: #4a6fa5;
+            border-color: #4a6fa5;
+            color: white;
+        }
+
+        .theme-dark .toolbar-select,
+        .theme-dark .toolbar-input {
+            background: #2a2a2a;
+            border-color: #444;
+            color: #ffffff;
+        }
+
+        .theme-dark .editor-area {
+            background: #2a2a2a;
+            border-color: #444;
+            color: #ffffff;
+        }
+
+        .theme-dark .editor-area:focus {
+            border-color: #7c6ae5;
+            box-shadow: 0 2px 8px rgba(124, 106, 229, 0.2);
+        }
+
+        /* ========== СТРОКА СОСТОЯНИЯ ========== */
+        .status-bar {
+            background: #ffffff;
+            border-top: 1px solid #e0e0e0;
+            padding: 8px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-        .header h1 {
-            color: #4a6fa5;
-            font-size: 1.5rem;
-        }
-        .btn {
-            background: #4a6fa5;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 10px 20px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-            margin-left: 10px;
-        }
-        .btn:hover {
-            background: #3a5a80;
-        }
-        .editor-container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.05);
-            overflow: hidden;
-        }
-        .doc-title-input {
-            width: 100%;
-            padding: 16px 20px;
-            font-size: 1.4rem;
-            font-weight: 600;
-            border: none;
-            border-bottom: 1px solid #eee;
-            outline: none;
-            background: #fdf8ee;
-        }
-        .doc-content {
-            width: 100%;
-            min-height: 70vh;
-            padding: 20px;
-            font-size: 1.1rem;
-            line-height: 1.6;
-            border: none;
-            outline: none;
-            resize: none;
-        }
-        .back-link {
-            color: #4a6fa5;
-            text-decoration: none;
-            font-size: 0.95rem;
-        }
-        #save-status {
-            margin-top: 8px;
             font-size: 0.85rem;
-            color: #6c757d;
-            text-align: right;
+            color: #666;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+        }
+
+        .save-status {
+            font-weight: 500;
+            color: #4caf50;
+        }
+
+        .save-status.saving {
+            color: #ff9800;
+        }
+
+        .theme-dark .status-bar {
+            background: #1e1e1e;
+            border-color: #333;
+            color: #aaa;
+        }
+
+        .theme-dark .save-status {
+            color: #81c784;
+        }
+
+        .theme-dark .save-status.saving {
+            color: #ffb74d;
+        }
+
+        /* ========== АДАПТИВНОСТЬ ========== */
+        @media (max-width: 768px) {
+            .doc-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            .toolbar {
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+            .toolbar-select {
+                min-width: 60px;
+            }
         }
     </style>
 </head>
-<body>
+<body class="theme-light">
 
-    <div class="header">
-        <h1>Редактор документа</h1>
-        <a href="/dashboard" class="back-link">← Назад к документам</a>
+    <!-- ШАПКА ДОКУМЕНТА -->
+    <div class="doc-header">
+        <div class="doc-title-wrapper">
+            <span class="doc-icon">📄</span>
+            <input type="text" id="docTitle" value="{{ title }}" placeholder="Без названия" class="doc-title-input">
+            <span class="star-icon" id="toggleStar">☆</span>
+        </div>
+        <div class="header-actions">
+            <button class="toolbar-btn" id="saveBtn"><i>💾</i><span class="tooltip">Сохранить документ</span></button>
+            <button class="toolbar-btn" id="themeToggle">🌙<span class="tooltip">Переключить тему</span></button>
+            <div class="avatar" style="margin-left: auto;">
+                {{ user[0].upper() }}
+            </div>
+        </div>
     </div>
 
-    <div class="editor-container">
-        <input type="text" class="doc-title-input" id="docTitle" placeholder="Название документа" value="{{ title }}">
-        <textarea class="doc-content" id="docContent" placeholder="Начните писать здесь...">{{ content }}</textarea>
+    <!-- ПАНЕЛЬ ИНСТРУМЕНТОВ -->
+    <div class="toolbar">
+        <!-- Отмена / Повтор -->
+        <button class="toolbar-btn" id="undoBtn"><i>↩️</i><span class="tooltip">Отменить</span></button>
+        <button class="toolbar-btn" id="redoBtn"><i>↪️</i><span class="tooltip">Повторить</span></button>
+
+        <!-- Шрифт -->
+        <div class="toolbar-dropdown">
+            <select class="toolbar-select" id="fontSelect">
+                <option>Arial</option>
+                <option>Times New Roman</option>
+                <option>Georgia</option>
+                <option>Courier New</option>
+                <option>Verdana</option>
+            </select>
+        </div>
+
+        <!-- Размер шрифта -->
+        <div class="toolbar-dropdown">
+            <input type="number" class="toolbar-input" id="fontSizeInput" value="11" min="8" max="72">
+        </div>
+
+        <!-- Увеличить/уменьшить размер -->
+        <button class="toolbar-btn" id="decreaseSizeBtn"><i>-</i><span class="tooltip">Уменьшить размер шрифта</span></button>
+        <button class="toolbar-btn" id="increaseSizeBtn"><i>+</i><span class="tooltip">Увеличить размер шрифта</span></button>
+
+        <!-- Жирный, курсив, подчёркнутый -->
+        <button class="toolbar-btn" id="boldBtn"><i>B</i><span class="tooltip">Жирный (Ctrl+B)</span></button>
+        <button class="toolbar-btn" id="italicBtn"><i>I</i><span class="tooltip">Курсив (Ctrl+I)</span></button>
+        <button class="toolbar-btn" id="underlineBtn"><i>U</i><span class="tooltip">Подчёркнутый (Ctrl+U)</span></button>
+
+        <!-- Цвет текста -->
+        <button class="toolbar-btn color-btn" id="textColorBtn">
+            <i>A</i>
+            <span class="tooltip">Цвет текста</span>
+        </button>
+        <div class="color-picker" id="textColorPicker">
+            <div class="color-option black" data-color="#000000"></div>
+            <div class="color-option red" data-color="#ff0000"></div>
+            <div class="color-option green" data-color="#00ff00"></div>
+            <div class="color-option blue" data-color="#0000ff"></div>
+            <div class="color-option yellow" data-color="#ffff00"></div>
+            <div class="color-option orange" data-color="#ffa500"></div>
+            <div class="color-option purple" data-color="#800080"></div>
+            <div class="color-option gray" data-color="#808080"></div>
+            <div class="color-option white" data-color="#ffffff"></div>
+        </div>
+
+        <!-- Цвет фона -->
+        <button class="toolbar-btn color-btn" id="highlightBtn">
+            <i>✏️</i>
+            <span class="tooltip">Цвет фона</span>
+        </button>
+        <div class="color-picker" id="highlightColorPicker">
+            <div class="color-option black" data-color="#000000"></div>
+            <div class="color-option red" data-color="#ff0000"></div>
+            <div class="color-option green" data-color="#00ff00"></div>
+            <div class="color-option blue" data-color="#0000ff"></div>
+            <div class="color-option yellow" data-color="#ffff00"></div>
+            <div class="color-option orange" data-color="#ffa500"></div>
+            <div class="color-option purple" data-color="#800080"></div>
+            <div class="color-option gray" data-color="#808080"></div>
+            <div class="color-option white" data-color="#ffffff"></div>
+        </div>
+
+        <!-- Выравнивание -->
+        <button class="toolbar-btn" id="alignLeftBtn"><i>←</i><span class="tooltip">По левому краю</span></button>
+        <button class="toolbar-btn" id="alignCenterBtn"><i>↔</i><span class="tooltip">По центру</span></button>
+        <button class="toolbar-btn" id="alignRightBtn"><i>→</i><span class="tooltip">По правому краю</span></button>
+        <button class="toolbar-btn" id="alignJustifyBtn"><i>≡</i><span class="tooltip">По ширине</span></button>
+
+        <!-- Нумерация / маркеры -->
+        <button class="toolbar-btn" id="listBtn"><i>•</i><span class="tooltip">Маркированный список</span></button>
+        <button class="toolbar-btn" id="numberedListBtn"><i>1.</i><span class="tooltip">Нумерованный список</span></button>
+
+        <!-- Индентация -->
+        <button class="toolbar-btn" id="indentBtn"><i>→</i><span class="tooltip">Увеличить отступ</span></button>
+        <button class="toolbar-btn" id="outdentBtn"><i>←</i><span class="tooltip">Уменьшить отступ</span></button>
+
+        <!-- Перечеркнутый -->
+        <button class="toolbar-btn" id="strikethroughBtn"><i>X</i><span class="tooltip">Перечеркнутый</span></button>
+
+        <!-- Раскрывающийся список — УДАЛЁН -->
+        <!-- <div class="toolbar-dropdown">
+            <select class="toolbar-select" id="moreOptions">
+                <option>...</option>
+                <option>Специальные символы</option>
+                <option>Таблица</option>
+                <option>Дата и время</option>
+            </select>
+        </div> -->
+
+        <!-- Карандаш — УДАЛЁН -->
+        <!-- <button class="toolbar-btn" id="editBtn"><i>✏️</i><span class="tooltip">Режим редактирования</span></button> -->
+
+        <!-- Вверх — УДАЛЁН -->
+        <!-- <button class="toolbar-btn" id="collapseBtn"><i>^</i><span class="tooltip">Свернуть панель</span></button> -->
     </div>
 
-    <div style="max-width: 800px; margin: 20px auto 0; display: flex; justify-content: flex-end; align-items: center; gap: 15px;">
-        <div id="save-status">Авто: включено (каждые 30 сек)</div>
-        <button class="btn" onclick="saveDocument()">Сохранить</button>
+    <!-- ОСНОВНОЙ КОНТЕНТ -->
+    <div class="editor-content">
+        <div class="editor-area" id="docContent" contenteditable="true">{{ content }}</div>
     </div>
 
-    <!-- Скрытые поля для обновления -->
-    <input type="hidden" id="docFile" value="{{ doc_file or '' }}">
+    <!-- СТРОКА СОСТОЯНИЯ -->
+    <div class="status-bar">
+        <div class="char-count" id="charCount">0 символов • 0 слов</div>
+        <div class="save-status" id="saveStatus">Сохранено</div>
+    </div>
 
     <script>
-        let autoSaveInterval;
+        // ========== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==========
+        let isStarred = false;
+        let autoSaveTimeout;
+        let isSaving = false;
+        let isFormatting = false;
 
-        function saveToServer(title, content, docFile) {
-            const formData = new FormData();
-            formData.append('title', title);
-            formData.append('content', content);
-            if (docFile) formData.append('doc_file', docFile);
+        // ========== ТЕМА ==========
+        const body = document.body;
+        const themeToggle = document.getElementById('themeToggle');
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        body.className = `theme-${savedTheme}`;
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
 
-            return fetch('/save-document', {
+        themeToggle.addEventListener('click', () => {
+            const newTheme = body.classList.contains('theme-dark') ? 'light' : 'dark';
+            body.className = `theme-${newTheme}`;
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+            localStorage.setItem('theme', newTheme);
+        });
+
+        // ========== ЗВЁЗДОЧКА ==========
+        const starIcon = document.getElementById('toggleStar');
+        starIcon.addEventListener('click', () => {
+            isStarred = !isStarred;
+            starIcon.textContent = isStarred ? '★' : '☆';
+            starIcon.classList.toggle('active');
+        });
+
+        // ========== АВТОСОХРАНЕНИЕ ==========
+        const docContent = document.getElementById('docContent');
+        const docTitle = document.getElementById('docTitle');
+        const charCount = document.getElementById('charCount');
+        const saveStatus = document.getElementById('saveStatus');
+
+        function updateCharCount() {
+            const text = docContent.innerText || '';
+            const chars = text.length;
+            const words = text.trim() ? text.trim().split(/\s+/).filter(Boolean).length : 0;
+            charCount.textContent = `${chars} символов • ${words} слов`;
+        }
+
+        function saveDocument(autosave = false) {
+            if (isSaving) return;
+
+            isSaving = true;
+            if (!autosave) {
+                saveStatus.textContent = 'Сохранение...';
+                saveStatus.className = 'save-status saving';
+            }
+
+            const title = docTitle.value.trim() || 'Без названия';
+            const content = docContent.innerHTML;
+
+            fetch('/save-document', {
                 method: 'POST',
-                body: formData
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title: title,
+                    content: content,
+                    doc_file: '{{ doc_file or "" }}',
+                    folder: '{{ folder or "documents" }}'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (!autosave) {
+                        // ✅ СОХРАНИЛИ — ПЕРЕНАПРАВЛЯЕМ НА ГЛАВНУЮ СТРАНИЦУ
+                        flashMessage("✅ Документ сохранён!", "success");
+                        setTimeout(() => {
+                            window.location.href = '/dashboard';
+                        }, 500);
+                    }
+                    saveStatus.textContent = 'Сохранено';
+                    saveStatus.className = 'save-status';
+                } else {
+                    saveStatus.textContent = '❌ Ошибка сохранения';
+                    saveStatus.className = 'save-status';
+                    if (!autosave) {
+                        flashMessage('❌ Ошибка сохранения', 'error');
+                    }
+                }
+            })
+            .catch(err => {
+                saveStatus.textContent = '❌ Ошибка сети';
+                saveStatus.className = 'save-status';
+                if (!autosave) {
+                    flashMessage('❌ Ошибка сети при сохранении', 'error');
+                }
+            })
+            .finally(() => {
+                isSaving = false;
             });
         }
 
-        async function saveDocument() {
-            const title = document.getElementById('docTitle').value.trim() || 'Без названия';
-            const content = document.getElementById('docContent').value;
-            const docFile = document.getElementById('docFile').value;
+        // Автосохранение при изменении
+        docContent.addEventListener('input', () => {
+            updateCharCount();
 
-            try {
-                const response = await saveToServer(title, content, docFile);
-                const result = await response.json();
-
-                if (response.ok) {
-                    // Обновляем скрытое поле, если новый документ
-                    if (!docFile && result.filename) {
-                        document.getElementById('docFile').value = result.filename;
-                    }
-                    document.getElementById('save-status').textContent = '✅ Сохранено!';
-                    document.getElementById('save-status').style.color = '#1b5e20';
-                    setTimeout(() => {
-                        document.getElementById('save-status').textContent = 'Авто: включено (каждые 30 сек)';
-                        document.getElementById('save-status').style.color = '#6c757d';
-                    }, 3000);
-                } else {
-                    document.getElementById('save-status').textContent = '❌ Ошибка';
-                    document.getElementById('save-status').style.color = '#c62828';
-                }
-            } catch (err) {
-                document.getElementById('save-status').textContent = '❌ Ошибка сети';
-                document.getElementById('save-status').style.color = '#c62828';
-                console.error(err);
+            // Сбрасываем предыдущий таймер
+            if (autoSaveTimeout) {
+                clearTimeout(autoSaveTimeout);
             }
-        }
 
-        function startAutoSave() {
-            autoSaveInterval = setInterval(() => {
-                if (document.getElementById('docContent').value.trim()) {
-                    saveDocument();
+            // Устанавливаем новый таймер (1 секунда)
+            autoSaveTimeout = setTimeout(() => {
+                if (!isSaving) {
+                    saveStatus.textContent = 'Сохраняется...';
+                    saveStatus.className = 'save-status saving';
+                    saveDocument(true); // автосохранение
                 }
-            }, 30000);
-        }
+            }, 1000);
+        });
 
-        document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && e.key === 's') {
-                e.preventDefault();
-                saveDocument();
+        // ========== ПАЛИТРЫ ЦВЕТОВ ==========
+
+        const textColorBtn = document.getElementById('textColorBtn');
+        const highlightBtn = document.getElementById('highlightBtn');
+        const textColorPicker = document.getElementById('textColorPicker');
+        const highlightColorPicker = document.getElementById('highlightColorPicker');
+
+        // Показать палитру цветов текста
+        textColorBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeAllColorPickers();
+            textColorPicker.style.display = 'grid';
+            textColorBtn.classList.add('active');
+        });
+
+        // Показать палитру цветов фона
+        highlightBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeAllColorPickers();
+            highlightColorPicker.style.display = 'grid';
+            highlightBtn.classList.add('active');
+        });
+
+        // Закрыть все палитры при клике вне
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.color-btn') && !e.target.closest('.color-picker')) {
+                closeAllColorPickers();
             }
         });
 
-        window.addEventListener('load', startAutoSave);
-        window.addEventListener('beforeunload', () => {
-            if (autoSaveInterval) clearInterval(autoSaveInterval);
+        // Применить цвет текста
+        document.querySelectorAll('#textColorPicker .color-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const color = option.getAttribute('data-color');
+                document.execCommand('foreColor', false, color);
+                closeAllColorPickers();
+            });
+        });
+
+        // Применить цвет фона
+        document.querySelectorAll('#highlightColorPicker .color-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const color = option.getAttribute('data-color');
+                document.execCommand('hiliteColor', false, color);
+                closeAllColorPickers();
+            });
+        });
+
+        function closeAllColorPickers() {
+            textColorPicker.style.display = 'none';
+            highlightColorPicker.style.display = 'none';
+            textColorBtn.classList.remove('active');
+            highlightBtn.classList.remove('active');
+        }
+
+        // ========== ФУНКЦИЯ ПОКАЗА СООБЩЕНИЯ ==========
+
+        function flashMessage(message, type) {
+            // Создаём временный div
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            alertDiv.style.position = 'fixed';
+            alertDiv.style.top = '20px';
+            alertDiv.style.right = '20px';
+            alertDiv.style.padding = '10px 20px';
+            alertDiv.style.borderRadius = '4px';
+            alertDiv.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+            alertDiv.style.zIndex = '10000';
+            alertDiv.style.backgroundColor = type === 'success' ? '#d1e7dd' : '#f8d7da';
+            alertDiv.style.color = type === 'success' ? '#1a5d1a' : '#721c24';
+            alertDiv.style.fontWeight = '500';
+
+            document.body.appendChild(alertDiv);
+
+            // Удаляем через 3 секунды
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 3000);
+        }
+
+        // ========== ОСТАЛЬНЫЕ ФУНКЦИИ ==========
+
+        // Сохранение — теперь перенаправляет на /dashboard
+        document.getElementById('saveBtn').addEventListener('click', () => saveDocument(false));
+
+        // Отмена/Повтор
+        document.getElementById('undoBtn').addEventListener('click', () => {
+            document.execCommand('undo');
+            updateToolbar();
+        });
+        document.getElementById('redoBtn').addEventListener('click', () => {
+            document.execCommand('redo');
+            updateToolbar();
+        });
+
+        // Жирный, курсив, подчёркнутый
+        document.getElementById('boldBtn').addEventListener('click', () => {
+            document.execCommand('bold');
+            updateToolbar();
+        });
+        document.getElementById('italicBtn').addEventListener('click', () => {
+            document.execCommand('italic');
+            updateToolbar();
+        });
+        document.getElementById('underlineBtn').addEventListener('click', () => {
+            document.execCommand('underline');
+            updateToolbar();
+        });
+
+        // Перечеркнутый
+        document.getElementById('strikethroughBtn').addEventListener('click', () => {
+            document.execCommand('strikeThrough');
+            updateToolbar();
+        });
+
+        // Выравнивание
+        document.getElementById('alignLeftBtn').addEventListener('click', () => {
+            document.execCommand('justifyLeft');
+            updateToolbar();
+        });
+        document.getElementById('alignCenterBtn').addEventListener('click', () => {
+            document.execCommand('justifyCenter');
+            updateToolbar();
+        });
+        document.getElementById('alignRightBtn').addEventListener('click', () => {
+            document.execCommand('justifyRight');
+            updateToolbar();
+        });
+        document.getElementById('alignJustifyBtn').addEventListener('click', () => {
+            document.execCommand('justifyFull');
+            updateToolbar();
+        });
+
+        // Списки
+        document.getElementById('listBtn').addEventListener('click', () => {
+            document.execCommand('insertUnorderedList');
+            updateToolbar();
+        });
+        document.getElementById('numberedListBtn').addEventListener('click', () => {
+            document.execCommand('insertOrderedList');
+            updateToolbar();
+        });
+
+        // Индентация
+        document.getElementById('indentBtn').addEventListener('click', () => {
+            document.execCommand('indent');
+            updateToolbar();
+        });
+        document.getElementById('outdentBtn').addEventListener('click', () => {
+            document.execCommand('outdent');
+            updateToolbar();
+        });
+
+        // Размер шрифта
+        document.getElementById('fontSizeInput').addEventListener('change', (e) => {
+            document.execCommand('fontSize', false, e.target.value);
+            updateToolbar();
+        });
+
+        // Увеличить/уменьшить размер
+        document.getElementById('increaseSizeBtn').addEventListener('click', () => {
+            const currentSize = parseInt(document.getElementById('fontSizeInput').value);
+            document.getElementById('fontSizeInput').value = currentSize + 1;
+            document.execCommand('fontSize', false, currentSize + 1);
+            updateToolbar();
+        });
+        document.getElementById('decreaseSizeBtn').addEventListener('click', () => {
+            const currentSize = parseInt(document.getElementById('fontSizeInput').value);
+            if (currentSize > 8) {
+                document.getElementById('fontSizeInput').value = currentSize - 1;
+                document.execCommand('fontSize', false, currentSize - 1);
+                updateToolbar();
+            }
+        });
+
+        // Шрифт
+        document.getElementById('fontSelect').addEventListener('change', (e) => {
+            document.execCommand('fontName', false, e.target.value);
+            updateToolbar();
+        });
+
+        // ========== ФУНКЦИИ ==========
+
+        function updateToolbar() {
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                document.getElementById('boldBtn').classList.toggle('active', document.queryCommandState('bold'));
+                document.getElementById('italicBtn').classList.toggle('active', document.queryCommandState('italic'));
+                document.getElementById('underlineBtn').classList.toggle('active', document.queryCommandState('underline'));
+                document.getElementById('strikethroughBtn').classList.toggle('active', document.queryCommandState('strikeThrough'));
+            }
+        }
+
+        // Автообновление стилей при изменении
+        docContent.addEventListener('input', updateToolbar);
+        docContent.addEventListener('keyup', updateToolbar);
+
+        // Горячие клавиши
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey) {
+                switch(e.key.toLowerCase()) {
+                    case 's':
+                        e.preventDefault();
+                        saveDocument(false);
+                        break;
+                    case 'b':
+                        e.preventDefault();
+                        document.execCommand('bold');
+                        updateToolbar();
+                        break;
+                    case 'i':
+                        e.preventDefault();
+                        document.execCommand('italic');
+                        updateToolbar();
+                        break;
+                    case 'u':
+                        e.preventDefault();
+                        document.execCommand('underline');
+                        updateToolbar();
+                        break;
+                    case 'z':
+                        e.preventDefault();
+                        document.execCommand('undo');
+                        break;
+                    case 'y':
+                        e.preventDefault();
+                        document.execCommand('redo');
+                        break;
+                }
+            }
+        });
+
+        // Установка начальных значений
+        window.addEventListener('load', () => {
+            docTitle.focus();
+            docContent.focus();
+            updateCharCount();
         });
     </script>
 

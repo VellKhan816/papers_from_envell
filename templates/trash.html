@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Корзина — Мои Документы</title>
     <style>
-        /* ========== ОБЩИЕ СТИЛИ ========== */
+        /* ВСЕ СТИЛИ БЕЗ ИЗМЕНЕНИЙ — копируем как есть */
         * {
             margin: 0;
             padding: 0;
@@ -380,7 +380,7 @@
             border: 1px solid #c8e6c9;
         }
 
-        /* ========== ОСТАЛЬНЫЕ СТИЛИ ========== */
+        /* ========== ПОСТОЯННОЕ МЕНЮ ========== */
         .sidebar {
             position: fixed;
             top: 0;
@@ -393,14 +393,8 @@
             padding: 20px 0;
             gap: 20px;
             z-index: 1001;
-            transition: transform 0.3s ease;
-            transform: translateX(-60px);
+            background: #1e1e1e; /* Фон меню */
             border: none;
-            border-radius: 0;
-        }
-
-        .sidebar.open {
-            transform: translateX(0);
         }
 
         .sidebar-item {
@@ -425,23 +419,7 @@
             overflow-y: auto;
             padding: 20px;
             z-index: 100;
-        }
-
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0);
-            z-index: 999;
-            pointer-events: none;
-        }
-
-        .overlay.visible {
-            background: rgba(0, 0, 0, 0.5);
-            pointer-events: all;
-            transition: background 0.3s ease;
+            margin-left: 60px; /* Отступ под меню */
         }
 
         .header {
@@ -457,11 +435,6 @@
             display: flex;
             align-items: center;
             gap: 15px;
-        }
-
-        .menu-icon {
-            font-size: 1.5rem;
-            cursor: pointer;
         }
 
         .logo {
@@ -514,20 +487,6 @@
             display: flex;
             align-items: center;
             gap: 10px;
-        }
-
-        .create-btn {
-            border: none;
-            border-radius: 50px;
-            padding: 12px 20px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            width: fit-content;
-            text-decoration: none;
         }
 
         .recent-docs {
@@ -806,48 +765,14 @@
 </head>
 <body class="theme-light">
 
-    <!-- Боковое меню -->
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-item tooltip">
-            <a href="/dashboard" style="text-decoration: none; color: inherit; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">🏠</a>
-            <span class="tooltip-text">Главная</span>
-        </div>
-        <div class="sidebar-item tooltip">
-            <a href="/dashboard" style="text-decoration: none; color: inherit; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">📄</a>
-            <span class="tooltip-text">Документы</span>
-        </div>
-        <div class="sidebar-item tooltip">
-            <span>📁</span>
-            <span class="tooltip-text">Папки</span>
-        </div>
-        <div class="sidebar-item tooltip">
-            <span>🔔</span>
-            <span class="tooltip-text">Напоминания</span>
-        </div>
-        <!-- ✅ ИКОНКА КОРЗИНЫ С ИНДИКАТОРОМ (АКТИВНА) -->
-        <div class="sidebar-item tooltip active">
-            <a href="/trash" style="text-decoration: none; color: inherit; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; position: relative;">
-                🗑️
-                {% if trash_count > 0 %}
-                    <span class="badge">{{ trash_count }}</span>
-                {% endif %}
-            </a>
-            <span class="tooltip-text">Корзина</span>
-        </div>
-        <div style="flex-grow: 1;"></div>
-        <div class="sidebar-item tooltip">
-            <span>⚙️</span>
-            <span class="tooltip-text">Настройки</span>
-        </div>
-    </div>
-
-    <div class="overlay" id="overlay"></div>
+    <!-- ✅ ЕДИНСТВЕННОЕ МЕНЮ ИЗ ОТДЕЛЬНОГО ФАЙЛА -->
+    {% include 'partials/_sidebar.html' %}
 
     <div class="main-content" id="mainContent">
 
         <div class="header">
             <div class="header-left">
-                <div class="menu-icon" id="menuToggle">☰</div>
+                <!-- ❌ УДАЛЕНА КНОПКА "☰" -->
                 <div class="logo">
                     <span>🗑️</span>
                     <span>Корзина</span>
@@ -956,27 +881,6 @@
             body.className = `theme-${newTheme}`;
             themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
             localStorage.setItem('theme', newTheme);
-        });
-
-        // ========== МЕНЮ ==========
-        const sidebar = document.getElementById('sidebar');
-        const menuToggle = document.getElementById('menuToggle');
-        const overlay = document.getElementById('overlay');
-        menuToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('open');
-            overlay.classList.toggle('visible');
-        });
-        overlay.addEventListener('click', () => {
-            sidebar.classList.remove('open');
-            overlay.classList.remove('visible');
-        });
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                sidebar.classList.remove('open');
-                overlay.classList.remove('visible');
-                document.getElementById('restoreModal').classList.remove('show');
-                document.getElementById('emptyTrashModal').classList.remove('show');
-            }
         });
 
         // ========== ВОССТАНОВЛЕНИЕ ==========

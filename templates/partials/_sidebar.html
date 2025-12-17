@@ -1,0 +1,32 @@
+<div class="sidebar" id="sidebar">
+    <a href="/dashboard" class="sidebar-item {{ 'active' if page == 'dashboard' else '' }} tooltip">
+        <span>🏠</span>
+        <span class="tooltip-text">Главная</span>
+    </a>
+    <a href="/dashboard" class="sidebar-item {{ 'active' if page == 'dashboard' else '' }} tooltip">
+        <span>📄</span>
+        <span class="tooltip-text">Документы</span>
+    </a>
+    <div class="sidebar-item tooltip">
+        <span>📁</span>
+        <span class="tooltip-text">Папки</span>
+    </div>
+    <div class="sidebar-item tooltip">
+        <span>🔔</span>
+        <span class="tooltip-text">Напоминания</span>
+    </div>
+    <a href="/trash" class="sidebar-item {{ 'active' if page == 'trash' else '' }} tooltip">
+        <span style="position: relative; display: inline-block;">
+            🗑️
+            {% if trash_count > 0 %}
+                <span class="badge">{{ trash_count }}</span>
+            {% endif %}
+        </span>
+        <span class="tooltip-text">Корзина</span>
+    </a>
+    <div style="flex-grow: 1;"></div>
+    <div class="sidebar-item tooltip">
+        <span>⚙️</span>
+        <span class="tooltip-text">Настройки</span>
+    </div>
+</div>

@@ -10,7 +10,7 @@ TRASH_DIR = os.path.join(os.path.dirname(__file__), 'trash')
 os.makedirs(DOCUMENTS_DIR, exist_ok=True)
 os.makedirs(TRASH_DIR, exist_ok=True)
 
-# Тестовые пользователи
+# Тестовые пользователи (логин: пароль)
 USERS = {
     "admin": "admin123",
     "user": "user321"
@@ -49,19 +49,21 @@ def get_documents(folder, is_trash=False):
 
 
 def count_trash_files():
+    """Считает файлы в корзине и удаляет старые (>30 дней)"""
     count = 0
     for filename in os.listdir(TRASH_DIR):
         if filename.endswith('.txt'):
             filepath = os.path.join(TRASH_DIR, filename)
             file_age = datetime.now() - datetime.fromtimestamp(os.path.getmtime(filepath))
-            if file_age.days <= 30:
-                count += 1
-            else:
+            if file_age.days > 30:
+                # Удаляем старые файлы
                 for ext in ['.txt', '.docx', '.pdf']:
                     try:
                         os.remove(filepath.replace('.txt', ext))
                     except:
                         pass
+            else:
+                count += 1
     return count
 
 
@@ -90,7 +92,10 @@ def dashboard():
         return redirect(url_for('login'))
     documents = get_documents(DOCUMENTS_DIR)
     trash_count = count_trash_files()
-    return render_template('dashboard.html', user=session['user'], documents=documents, page='dashboard',
+    return render_template('dashboard.html',
+                           user=session['user'],
+                           documents=documents,
+                           page='dashboard',
                            trash_count=trash_count)
 
 
@@ -99,8 +104,11 @@ def trash():
     if 'user' not in session:
         return redirect(url_for('login'))
     documents = get_documents(TRASH_DIR, is_trash=True)
-    trash_count = len(documents)
-    return render_template('trash.html', user=session['user'], documents=documents, page='trash',
+    trash_count = count_trash_files()
+    return render_template('trash.html',
+                           user=session['user'],
+                           documents=documents,
+                           page='trash',
                            trash_count=trash_count)
 
 
@@ -125,7 +133,14 @@ def editor():
             lines = f.read().split('\n', 3)
             title = lines[0].replace('Заголовок: ', '') if len(lines) > 0 else 'Без названия'
             content = lines[3] if len(lines) > 3 else ''
-    return render_template('editor.html', title=title, content=content, doc_file=doc_file, folder=folder)
+
+    # ✅ ИСПРАВЛЕНО: добавлена передача user
+    return render_template('editor.html',
+                           title=title,
+                           content=content,
+                           doc_file=doc_file,
+                           folder=folder,
+                           user=session['user'])  # ← ЭТА СТРОКА РЕШАЕТ ОШИБКУ
 
 
 @app.route('/save-document', methods=['POST'])
@@ -157,8 +172,8 @@ def save_document():
         doc.add_heading(title, 0)
         doc.add_paragraph(content)
         doc.save(docx_path)
-    except:
-        pass
+    except Exception as e:
+        print(f"Ошибка сохранения DOCX: {e}")
 
     # PDF
     try:
@@ -172,8 +187,8 @@ def save_document():
         pdf.set_font('Arial', '', 12)
         pdf.multi_cell(0, 10, content)
         pdf.output(pdf_path)
-    except:
-        pass
+    except Exception as e:
+        print(f"Ошибка сохранения PDF: {e}")
 
     return jsonify({"success": True, "filename": doc_file, "message": f"✅ Документ '{title}' сохранён!"})
 
@@ -215,8 +230,8 @@ def empty_trash():
         if any(filename.endswith(ext) for ext in ['.txt', '.docx', '.pdf']):
             try:
                 os.remove(os.path.join(TRASH_DIR, filename))
-            except:
-                pass
+            except Exception as e:
+                print(f"Ошибка удаления {filename}: {e}")
 
     return jsonify({"success": True, "message": "Корзина очищена"})
 
